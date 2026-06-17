@@ -86,3 +86,78 @@ export function personalBest(
   }
   return { best, key };
 }
+
+export type DaySummaryData = {
+  /** Calls gesamt. */
+  total: number;
+  /** Aktiv-Fenster (erster bis letzter Call bzw. Start/Ende), Minuten des Tages. */
+  startMin: number | null;
+  endMin: number | null;
+  /** Produktivste Stunde (0–23) und Anzahl darin. */
+  peakHour: number | null;
+  peakCount: number;
+  /** Ø Calls pro aktiver Stunde. */
+  perHour: number | null;
+  /** Stundenverteilung von der ersten bis zur letzten aktiven Stunde. */
+  hourly: { hour: number; count: number }[];
+};
+
+/**
+ * Wertet die Call-Zeitpunkte eines Tages aus: Summe, Aktiv-Fenster,
+ * produktivste Stunde, Schnitt pro Stunde und die Stundenverteilung.
+ */
+export function summarizeDay(
+  events: number[],
+  startedAt: number | null,
+  endedAt: number | null
+): DaySummaryData {
+  const total = events.length;
+  const counts = new Array(24).fill(0);
+  for (const m of events) {
+    const h = Math.floor(m / 60);
+    if (h >= 0 && h < 24) counts[h]++;
+  }
+
+  let startMin = startedAt;
+  let endMin = endedAt;
+  if (events.length) {
+    startMin = startMin ?? Math.min(...events);
+    endMin = endMin ?? Math.max(...events);
+  }
+
+  let peakHour: number | null = null;
+  let peakCount = 0;
+  for (let h = 0; h < 24; h++) {
+    if (counts[h] > peakCount) {
+      peakCount = counts[h];
+      peakHour = h;
+    }
+  }
+
+  let firstH = startMin != null ? Math.floor(startMin / 60) : null;
+  let lastH = endMin != null ? Math.floor(endMin / 60) : null;
+  if (firstH == null || lastH == null) {
+    const withData = counts
+      .map((c, h) => ({ c, h }))
+      .filter((x) => x.c > 0)
+      .map((x) => x.h);
+    if (withData.length) {
+      firstH = Math.min(...withData);
+      lastH = Math.max(...withData);
+    }
+  }
+
+  const hourly: { hour: number; count: number }[] = [];
+  if (firstH != null && lastH != null) {
+    for (let h = firstH; h <= lastH; h++) hourly.push({ hour: h, count: counts[h] });
+  }
+
+  let perHour: number | null = null;
+  if (startMin != null && endMin != null && endMin > startMin) {
+    perHour = total / ((endMin - startMin) / 60);
+  } else if (total > 0) {
+    perHour = total;
+  }
+
+  return { total, startMin, endMin, peakHour, peakCount, perHour, hourly };
+}
