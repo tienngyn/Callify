@@ -2,7 +2,7 @@
 
 import { getDayConfig, isWorkday } from "@/lib/config";
 import { dayKey, formatMonth, monthGrid } from "@/lib/date";
-import { monthStats, DaysMap } from "@/lib/stats";
+import { monthStats, personalBest, DaysMap } from "@/lib/stats";
 
 const WEEKDAY_HEADER = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
@@ -23,10 +23,25 @@ export default function MonthView({ days, now }: { days: DaysMap; now: Date }) {
   const stats = monthStats(days, now);
   const grid = monthGrid(now);
   const todayKey = dayKey(now);
+  const record = personalBest(days);
+  const recordDate = record.key
+    ? new Date(record.key).toLocaleDateString("de-DE", {
+        day: "2-digit",
+        month: "2-digit",
+      })
+    : null;
 
   return (
     <div className="flex w-full flex-col gap-3">
-      <p className="text-sm font-semibold text-muted">{formatMonth(now)}</p>
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-semibold text-muted">{formatMonth(now)}</p>
+        {record.best > 0 && (
+          <p className="tnum text-sm font-semibold text-muted">
+            🏆 Rekord {record.best}
+            {recordDate && <span className="text-faint"> ({recordDate})</span>}
+          </p>
+        )}
+      </div>
 
       <div className="grid grid-cols-3 gap-2.5">
         <Tile label="Calls gesamt" value={String(stats.total)} />

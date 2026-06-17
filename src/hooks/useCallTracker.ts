@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { STORAGE_KEY, getDayConfig, MILESTONES } from "@/lib/config";
 import { dayKey, minutesOfDay } from "@/lib/date";
 import { computePace } from "@/lib/pace";
+import { personalBest } from "@/lib/stats";
 
 /** Verlauf: abgeschlossene Calls pro Kalendertag (Key = YYYY-MM-DD). */
 type DaysMap = Record<string, number>;
@@ -54,6 +55,12 @@ export function useCallTracker() {
   const config = getDayConfig(weekday);
   const completed = days[today] ?? 0;
 
+  // Bisheriger Bestwert ohne heute (der Rekord, den es zu schlagen gilt).
+  const recordToBeat = useMemo(
+    () => personalBest(days, today).best,
+    [days, today]
+  );
+
   // Laden nach Mount.
   useEffect(() => {
     const loaded = loadDays();
@@ -76,7 +83,38 @@ export function useCallTracker() {
   // Live-Uhr (für Pace) + Datumswechsel.
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30_000);
-    return () => clearInterval(id);
+
+    // Punktgenauer Tick kurz nach Mitternacht — robust auch dann, wenn das
+    // 30s-Intervall im Hintergrund gedrosselt wird.
+    let midnightTimer: ReturnType<typeof setTimeout>;
+    const scheduleMidnight = () => {
+      const n = new Date();
+      const next = new Date(
+        n.getFullYear(),
+        n.getMonth(),
+        n.getDate() + 1,
+        0,
+        0,
+        2
+      );
+      midnightTimer = setTimeout(() => {
+        setNow(new Date());
+        scheduleMidnight();
+      }, next.getTime() - n.getTime());
+    };
+    scheduleMidnight();
+
+    // Beim Zurückkehren in den Tab die Uhr sofort nachziehen.
+    const onVisible = () => {
+      if (document.visibilityState === "visible") setNow(new Date());
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      clearInterval(id);
+      clearTimeout(midnightTimer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
 
   // Bump- + Meilenstein-Erkennung.
@@ -90,6 +128,9 @@ export function useCallTracker() {
       // Stretch-Ziel (z. B. 40) hat Vorrang vor den Ziel-Meilensteinen.
       const hitStretch =
         prev < config.stretchGoal && completed >= config.stretchGoal;
+      // Neuer persönlicher Rekord (nur wenn es überhaupt einen zu schlagen gab).
+      const brokeRecord =
+        recordToBeat > 0 && prev <= recordToBeat && completed > recordToBeat;
       const hit = MILESTONES.find((m) => {
         const threshold = Math.ceil(m.fraction * config.goal);
         return prev < threshold && completed >= threshold;
@@ -102,6 +143,18 @@ export function useCallTracker() {
         if (typeof navigator !== "undefined" && "vibrate" in navigator) {
           try {
             navigator.vibrate([40, 60, 40, 60, 120]);
+          } catch {
+            /* ignore */
+          }
+        }
+      } else if (brokeRecord) {
+        setMilestone({
+          label: "Neuer Rekord 🏆",
+          message: `${completed} Calls — dein bester Tag.`,
+        });
+        if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+          try {
+            navigator.vibrate([60, 50, 60]);
           } catch {
             /* ignore */
           }
@@ -120,7 +173,7 @@ export function useCallTracker() {
       return () => clearTimeout(bumpTimer);
     }
     prevCompleted.current = completed;
-  }, [completed, hydrated, config.goal, config.stretchGoal]);
+  }, [completed, hydrated, config.goal, config.stretchGoal, recordToBeat]);
 
   const setToday = useCallback((updater: (current: number) => number) => {
     setDays((prev) => {
