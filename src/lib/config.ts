@@ -14,30 +14,42 @@ export type WorkWindow = {
   endMin: number;
 };
 
+/** Pause innerhalb des Arbeitsfensters (zählt nicht ins Soll). */
+export type Break = {
+  startMin: number;
+  endMin: number;
+};
+
 export type DayConfig = {
   /** Tagesziel an abgeschlossenen Calls. */
   goal: number;
   /** Arbeitszeitfenster für die Pace-Berechnung. */
   window: WorkWindow;
+  /** Pausen, in denen das Soll pausiert (z. B. Mittagspause). */
+  breaks: Break[];
 };
 
 const hm = (h: number, m = 0) => h * 60 + m;
 
+/** Standard-Mittagspause an langen Tagen (Mi/Do). Hier anpassbar. */
+const LUNCH: Break = { startMin: hm(12, 0), endMin: hm(12, 30) };
+
 /**
  * Ziel + Arbeitsfenster pro Wochentag.
- * Mi (3) & Do (4): 40 Calls, 08:00–16:30.
- * Fr (5): 25 Calls, 08:30–12:30.
+ * Mi (3) & Do (4): 40 Calls, 08:00–16:30, Mittagspause 12:00–12:30.
+ * Fr (5): 25 Calls, 08:30–12:30 (Halbtag, keine Pause).
  */
 export const DAY_CONFIGS: Record<number, DayConfig> = {
-  3: { goal: 40, window: { startMin: hm(8, 0), endMin: hm(16, 30) } }, // Mittwoch
-  4: { goal: 40, window: { startMin: hm(8, 0), endMin: hm(16, 30) } }, // Donnerstag
-  5: { goal: 25, window: { startMin: hm(8, 30), endMin: hm(12, 30) } }, // Freitag
+  3: { goal: 40, window: { startMin: hm(8, 0), endMin: hm(16, 30) }, breaks: [LUNCH] }, // Mittwoch
+  4: { goal: 40, window: { startMin: hm(8, 0), endMin: hm(16, 30) }, breaks: [LUNCH] }, // Donnerstag
+  5: { goal: 25, window: { startMin: hm(8, 30), endMin: hm(12, 30) }, breaks: [] }, // Freitag
 };
 
 /** Fallback für Tage ohne eigene Konfiguration (keine echten Arbeitstage). */
 export const DEFAULT_DAY_CONFIG: DayConfig = {
   goal: 40,
   window: { startMin: hm(8, 0), endMin: hm(16, 30) },
+  breaks: [LUNCH],
 };
 
 export function getDayConfig(weekday: number): DayConfig {
