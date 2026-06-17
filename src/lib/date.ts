@@ -31,3 +31,26 @@ export function weekDates(ref: Date = new Date()): Date[] {
     return d;
   });
 }
+
+/**
+ * 6×7-Raster (42 Tage, Mo-Start) für den Monat, in dem `ref` liegt.
+ * Tage aus Nachbarmonaten füllen die Ränder (`inMonth: false`).
+ */
+export function monthGrid(ref: Date = new Date()): { date: Date; inMonth: boolean }[] {
+  const year = ref.getFullYear();
+  const month = ref.getMonth();
+  const first = new Date(year, month, 1);
+  const startPad = (first.getDay() + 6) % 7; // Mo = 0
+  const start = new Date(first);
+  start.setDate(1 - startPad);
+  return Array.from({ length: 42 }, (_, i) => {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    return { date: d, inMonth: d.getMonth() === month };
+  });
+}
+
+/** Deutscher Monatsname + Jahr, z. B. "Juni 2026". */
+export function formatMonth(ref: Date = new Date()): string {
+  return ref.toLocaleDateString("de-DE", { month: "long", year: "numeric" });
+}

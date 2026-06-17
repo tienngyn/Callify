@@ -9,9 +9,16 @@ import ProgressRing from "@/components/ProgressRing";
 import PaceBanner from "@/components/PaceBanner";
 import MilestoneFlash from "@/components/MilestoneFlash";
 import WeekView from "@/components/WeekView";
+import MonthView from "@/components/MonthView";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 
-type View = "today" | "week";
+type View = "today" | "week" | "month";
+
+const VIEW_LABELS: Record<View, string> = {
+  today: "Heute",
+  week: "Woche",
+  month: "Monat",
+};
 
 export default function Home() {
   const t = useCallTracker();
@@ -53,7 +60,7 @@ export default function Home() {
 
         {/* Ansicht-Umschalter */}
         <div className="seg mt-5 flex shrink-0 gap-1 p-1">
-          {(["today", "week"] as View[]).map((v) => (
+          {(["today", "week", "month"] as View[]).map((v) => (
             <button
               key={v}
               onClick={() => setView(v)}
@@ -62,7 +69,7 @@ export default function Home() {
                 view === v ? "seg-active text-ink" : "text-muted"
               }`}
             >
-              {v === "today" ? "Heute" : "Woche"}
+              {VIEW_LABELS[v]}
             </button>
           ))}
         </div>
@@ -134,7 +141,11 @@ export default function Home() {
           </>
         ) : (
           <section className="mt-4 flex min-h-0 flex-1 flex-col overflow-hidden">
-            <WeekView days={t.days} now={t.now} />
+            {view === "week" ? (
+              <WeekView days={t.days} now={t.now} />
+            ) : (
+              <MonthView days={t.days} now={t.now} />
+            )}
           </section>
         )}
       </div>
