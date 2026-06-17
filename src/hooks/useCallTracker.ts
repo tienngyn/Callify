@@ -87,11 +87,26 @@ export function useCallTracker() {
       setJustBumped(true);
       const bumpTimer = setTimeout(() => setJustBumped(false), 420);
 
+      // Stretch-Ziel (z. B. 40) hat Vorrang vor den Ziel-Meilensteinen.
+      const hitStretch =
+        prev < config.stretchGoal && completed >= config.stretchGoal;
       const hit = MILESTONES.find((m) => {
         const threshold = Math.ceil(m.fraction * config.goal);
         return prev < threshold && completed >= threshold;
       });
-      if (hit) {
+      if (hitStretch) {
+        setMilestone({
+          label: "Stretch geknackt 🚀",
+          message: `Volle ${config.stretchGoal} — stark!`,
+        });
+        if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+          try {
+            navigator.vibrate([40, 60, 40, 60, 120]);
+          } catch {
+            /* ignore */
+          }
+        }
+      } else if (hit) {
         setMilestone({ label: hit.label, message: hit.message });
         if (typeof navigator !== "undefined" && "vibrate" in navigator) {
           try {
@@ -105,7 +120,7 @@ export function useCallTracker() {
       return () => clearTimeout(bumpTimer);
     }
     prevCompleted.current = completed;
-  }, [completed, hydrated, config.goal]);
+  }, [completed, hydrated, config.goal, config.stretchGoal]);
 
   const setToday = useCallback((updater: (current: number) => number) => {
     setDays((prev) => {
@@ -132,6 +147,7 @@ export function useCallTracker() {
     now,
     weekday,
     goal: config.goal,
+    stretchGoal: config.stretchGoal,
     completed,
     days,
     pace,

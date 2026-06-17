@@ -52,19 +52,27 @@ npm run build && npm start   # Produktions-Build lokal testen
 
 Alle Konstanten liegen in **`src/lib/config.ts`**:
 
-- `DAY_CONFIGS` — Ziel + Arbeitszeitfenster pro Wochentag (0 = Sonntag …
-  6 = Samstag). Zeiten in Minuten ab Mitternacht (Helper `hm(stunde, minute)`).
+- `DAY_CONFIGS` — pro Wochentag (0 = Sonntag … 6 = Samstag):
+  - `goal` — **echtes Ziel**, danach gilt alles als Bonus und das Banner sagt
+    „Ziel erreicht". Standard: Mi/Do 35, Fr 20.
+  - `stretchGoal` — **Stretch-Ziel** zum Overperformen (sichtbar, aber kein
+    „Muss"). Standard: Mi/Do 40, Fr 25. Wird im Ring als dezenter Bonus-Bogen
+    und als Meilenstein-Flash gefeiert.
+  - `window` — Arbeitszeitfenster (Minuten ab Mitternacht, Helper `hm(h, m)`).
+  - `breaks` — Pausen, in denen das Soll flach bleibt (Standard Mi/Do
+    Mittagspause 12:00–12:30; siehe Konstante `LUNCH`).
 - `DEFAULT_DAY_CONFIG` — Fallback für Tage ohne eigene Konfiguration.
-- `MILESTONES` — Schwellen und Texte für die Meilenstein-Flashes.
+- `MILESTONES` — Schwellen (Anteil von `goal`) und Texte für die Flashes.
 
-Beispiel — Donnerstag auf 45 Calls und Fenster 08:30–17:00 setzen:
+Beispiel — Donnerstag auf Ziel 38 / Stretch 45 und Fenster 08:30–17:00:
 
 ```ts
-4: { goal: 45, window: { startMin: hm(8, 30), endMin: hm(17, 0) } },
+4: { goal: 38, stretchGoal: 45, window: { startMin: hm(8, 30), endMin: hm(17, 0) }, breaks: [LUNCH] },
 ```
 
 Die Pace-Logik (`src/lib/pace.ts`) leitet das erwartete Soll linear aus dem
-Fenster ab — sie zieht ihre Werte automatisch aus `config.ts`.
+Fenster (abzüglich Pausen) ab und misst gegen das echte `goal` — alles darüber
+ist Bonus.
 
 ## Auf Vercel deployen
 
