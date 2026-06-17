@@ -47,7 +47,8 @@ export default function Home() {
             </h1>
             <p className="text-sm text-muted">
               {WEEKDAY_NAMES[t.weekday]} · Ziel{" "}
-              <span className="tnum font-semibold text-ink">{t.goal}</span> Calls
+              <span className="tnum font-semibold text-ink">{t.goal}</span>
+              <span className="text-faint"> · Stretch {t.stretchGoal}</span>
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -81,6 +82,7 @@ export default function Home() {
               <ProgressRing
                 completed={t.completed}
                 goal={t.goal}
+                stretch={t.stretchGoal}
                 bumped={t.justBumped}
               />
             </section>
