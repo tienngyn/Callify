@@ -20,10 +20,10 @@ export default function MilestoneFlash({
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 top-6 z-50 flex justify-center px-4"
+      className="pointer-events-none fixed inset-x-0 top-5 z-50 flex justify-center px-4"
       aria-live="assertive"
     >
-      <div className="nm-raised animate-flash-in flex items-center gap-3 rounded-full px-5 py-3">
+      <div className="card animate-flash-in flex items-center gap-3 px-5 py-3">
         <span className="text-lg text-ink" aria-hidden>
           ✦
         </span>

@@ -1,29 +1,38 @@
 @import "tailwindcss";
 
+/* Default-Tokens = Neumorphism. Themes überschreiben diese unten. */
 @theme {
-  /* Monochrome Neumorphism-Palette: ein einziger Grauton trägt alles. */
   --color-canvas: #e8e8e8;
-  --color-surface: #e8e8e8;
   --color-ink: #1d1d1d;
   --color-muted: #6e6e6e;
   --color-faint: #9a9a9a;
-  --color-groove: #d4d4d4;
-
-  /* Neumorphism-Schatten. */
-  --nm-light: #ffffff;
-  --nm-dark: #bebebe;
 
   --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
+:root {
+  --app-bg: #e8e8e8;
+  --ring-track: #d4d4d4;
+  --ring-fill: #1d1d1d;
+  --accent: #1d1d1d;
+  --nm-light: #ffffff;
+  --nm-dark: #bebebe;
+}
+
+html,
+body {
+  height: 100%;
+}
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
-
 body {
-  background-color: var(--color-canvas);
+  overflow: hidden;
+  background: var(--app-bg);
+  background-size: cover;
+  background-attachment: fixed;
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -46,70 +55,436 @@ button {
   border-radius: 0.75rem;
 }
 
-/* ---- Neumorphism-Bausteine ---- */
+/* ============================================================
+   Basis-Skin = NEUMORPHISM (Default-Theme)
+   ============================================================ */
 
-.nm-raised {
+.card {
+  border-radius: 1.5rem;
   background: var(--color-canvas);
   box-shadow: 7px 7px 16px var(--nm-dark), -7px -7px 16px var(--nm-light);
 }
-
-.nm-inset {
+.card-2 {
+  border-radius: 1.25rem;
   background: var(--color-canvas);
   box-shadow: inset 5px 5px 11px var(--nm-dark),
     inset -5px -5px 11px var(--nm-light);
 }
-
-/* Primärer CTA: dunkle, plastisch erhabene Taste. */
-.nm-cta {
+.ring-shell {
+  border-radius: 9999px;
+  background: var(--color-canvas);
+  box-shadow: 7px 7px 16px var(--nm-dark), -7px -7px 16px var(--nm-light);
+}
+.cta {
+  border-radius: 1.75rem;
+  font-weight: 700;
   background: var(--color-ink);
   color: #f4f4f4;
   box-shadow: 7px 7px 16px var(--nm-dark), -7px -7px 16px var(--nm-light);
-  transition: box-shadow 0.18s ease, transform 0.12s ease;
+  transition: box-shadow 0.18s ease, transform 0.12s ease, background 0.2s ease;
 }
-.nm-cta:active {
+.cta:active {
   transform: scale(0.985);
   box-shadow: 3px 3px 8px var(--nm-dark), -3px -3px 8px var(--nm-light);
 }
-
-/* Kleine runde Tasten. */
-.nm-icon {
+.icon-btn {
+  border-radius: 9999px;
   background: var(--color-canvas);
   color: var(--color-ink);
   box-shadow: 5px 5px 11px var(--nm-dark), -5px -5px 11px var(--nm-light);
-  transition: box-shadow 0.16s ease, transform 0.12s ease;
+  transition: box-shadow 0.16s ease, transform 0.12s ease, background 0.16s ease;
 }
-.nm-icon:active {
+.icon-btn:active {
   transform: scale(0.95);
   box-shadow: inset 3px 3px 7px var(--nm-dark),
     inset -3px -3px 7px var(--nm-light);
 }
-
-/* Dezente Text-Buttons. */
-.nm-ghost {
-  transition: box-shadow 0.16s ease, color 0.16s ease;
+.ghost {
+  border-radius: 0.75rem;
+  border: 2px solid transparent;
+  transition: box-shadow 0.16s ease, background 0.16s ease, color 0.16s ease,
+    border-color 0.16s ease;
 }
-.nm-ghost:active {
+.ghost:active {
   box-shadow: inset 3px 3px 7px var(--nm-dark),
     inset -3px -3px 7px var(--nm-light);
 }
+.chip {
+  border-radius: 9999px;
+  background: var(--color-canvas);
+  box-shadow: inset 3px 3px 7px var(--nm-dark),
+    inset -3px -3px 7px var(--nm-light);
+}
+.seg {
+  border-radius: 1rem;
+  background: var(--color-canvas);
+  box-shadow: inset 4px 4px 9px var(--nm-dark),
+    inset -4px -4px 9px var(--nm-light);
+}
+.seg-active {
+  background: var(--color-canvas);
+  box-shadow: 4px 4px 9px var(--nm-dark), -4px -4px 9px var(--nm-light);
+}
+.ring-track-bar {
+  background: var(--color-canvas);
+  box-shadow: inset 2px 2px 5px var(--nm-dark),
+    inset -2px -2px 5px var(--nm-light);
+}
 
-/* ---- Motion ---- */
+/* ============================================================
+   CLASSIC LIGHT — heller SaaS-Look
+   ============================================================ */
+[data-theme="classic"] {
+  --color-canvas: #f6f5f1;
+  --color-ink: #1c1b19;
+  --color-muted: #6b6862;
+  --color-faint: #a3a09a;
+  --app-bg: #f6f5f1;
+  --ring-track: #e8e6e0;
+  --ring-fill: #2f9e6f;
+  --accent: #2f9e6f;
+}
+[data-theme="classic"] .card,
+[data-theme="classic"] .ring-shell {
+  background: #fffefb;
+  border: 1px solid #e8e6e0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+[data-theme="classic"] .card-2,
+[data-theme="classic"] .chip,
+[data-theme="classic"] .seg {
+  background: #fffefb;
+  border: 1px solid #e8e6e0;
+  box-shadow: none;
+}
+[data-theme="classic"] .seg-active {
+  background: #efeee8;
+  border: 1px solid #e0ded6;
+  box-shadow: none;
+}
+[data-theme="classic"] .cta {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 12px 26px -8px rgba(47, 158, 111, 0.55);
+}
+[data-theme="classic"] .cta:active {
+  transform: scale(0.985);
+  box-shadow: 0 6px 16px -8px rgba(47, 158, 111, 0.55);
+}
+[data-theme="classic"] .icon-btn {
+  background: #fffefb;
+  border: 1px solid #e8e6e0;
+  box-shadow: none;
+}
+[data-theme="classic"] .icon-btn:active {
+  transform: scale(0.95);
+  background: #efeee8;
+  box-shadow: none;
+}
+[data-theme="classic"] .ghost:active {
+  box-shadow: none;
+  background: #ecebe4;
+}
+[data-theme="classic"] .ring-track-bar {
+  background: #e8e6e0;
+  box-shadow: none;
+}
 
+/* ============================================================
+   LIQUID GLASS — mattes Glas auf Farbverlauf
+   ============================================================ */
+[data-theme="glass"] {
+  --color-ink: #1e1b2e;
+  --color-muted: #4b475e;
+  --color-faint: #756f8c;
+  --app-bg: radial-gradient(at 18% 18%, #b8c6ff 0, transparent 50%),
+    radial-gradient(at 82% 6%, #d8b4fe 0, transparent 48%),
+    radial-gradient(at 50% 100%, #fbcfe8 0, transparent 55%), #c7d2fe;
+  --ring-track: rgba(255, 255, 255, 0.55);
+  --ring-fill: #6d28d9;
+  --accent: #7c3aed;
+}
+[data-theme="glass"] .card,
+[data-theme="glass"] .ring-shell {
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.18);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+[data-theme="glass"] .card-2,
+[data-theme="glass"] .chip,
+[data-theme="glass"] .seg {
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+}
+[data-theme="glass"] .seg-active {
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+[data-theme="glass"] .cta {
+  background: linear-gradient(135deg, #7c3aed, #db2777);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 30px -6px rgba(124, 58, 237, 0.5);
+}
+[data-theme="glass"] .cta:active {
+  transform: scale(0.985);
+}
+[data-theme="glass"] .icon-btn {
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 16px rgba(31, 38, 135, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+[data-theme="glass"] .icon-btn:active {
+  transform: scale(0.95);
+}
+[data-theme="glass"] .ghost:active {
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: none;
+}
+[data-theme="glass"] .ring-track-bar {
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: none;
+}
+
+/* ============================================================
+   NEO-BRUTALISM — harte Kanten, knallig
+   ============================================================ */
+[data-theme="brutalism"] {
+  --color-canvas: #f3efe4;
+  --color-ink: #111111;
+  --color-muted: #3a362c;
+  --color-faint: #8a8576;
+  --app-bg: #f3efe4;
+  --ring-track: #e2dccb;
+  --ring-fill: #111111;
+  --accent: #ff4d00;
+}
+[data-theme="brutalism"] .card {
+  background: #fffdf5;
+  border: 2.5px solid #111;
+  box-shadow: 5px 5px 0 #111;
+  border-radius: 0.9rem;
+}
+[data-theme="brutalism"] .ring-shell {
+  background: #fffdf5;
+  border: 2.5px solid #111;
+  box-shadow: 5px 5px 0 #111;
+}
+[data-theme="brutalism"] .card-2 {
+  background: #ffe8d6;
+  border: 2.5px solid #111;
+  box-shadow: 3px 3px 0 #111;
+  border-radius: 0.9rem;
+}
+[data-theme="brutalism"] .chip {
+  background: #fef08a;
+  border: 2.5px solid #111;
+  box-shadow: 3px 3px 0 #111;
+}
+[data-theme="brutalism"] .seg {
+  background: #fffdf5;
+  border: 2.5px solid #111;
+  box-shadow: 3px 3px 0 #111;
+  border-radius: 0.9rem;
+}
+[data-theme="brutalism"] .seg-active {
+  background: var(--accent);
+  box-shadow: none;
+}
+[data-theme="brutalism"] .cta {
+  background: var(--accent);
+  color: #111;
+  border: 2.5px solid #111;
+  box-shadow: 6px 6px 0 #111;
+  border-radius: 0.9rem;
+  font-weight: 800;
+}
+[data-theme="brutalism"] .cta:active {
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 #111;
+}
+[data-theme="brutalism"] .icon-btn {
+  background: #fef08a;
+  color: #111;
+  border: 2.5px solid #111;
+  box-shadow: 3px 3px 0 #111;
+}
+[data-theme="brutalism"] .icon-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #111;
+}
+[data-theme="brutalism"] .ghost:active {
+  box-shadow: none;
+  border-color: #111;
+  background: #fffdf5;
+}
+[data-theme="brutalism"] .ring-track-bar {
+  background: #fffdf5;
+  border: 2px solid #111;
+  box-shadow: none;
+}
+
+/* ============================================================
+   MIDNIGHT — dunkel, minimal, Glow
+   ============================================================ */
+[data-theme="midnight"] {
+  --color-canvas: #15151c;
+  --color-ink: #f4f4f7;
+  --color-muted: #9a9aa8;
+  --color-faint: #5d5d6b;
+  --app-bg: radial-gradient(at 50% -10%, #1d1d2e 0, transparent 60%), #0b0b0f;
+  --ring-track: #26262f;
+  --ring-fill: #818cf8;
+  --accent: #6366f1;
+}
+[data-theme="midnight"] .card,
+[data-theme="midnight"] .ring-shell {
+  background: #15151c;
+  border: 1px solid #26262f;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+[data-theme="midnight"] .card-2,
+[data-theme="midnight"] .chip,
+[data-theme="midnight"] .seg {
+  background: #101017;
+  border: 1px solid #232330;
+  box-shadow: none;
+}
+[data-theme="midnight"] .seg-active {
+  background: #1e1e2a;
+  border: 1px solid #33334a;
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.25);
+}
+[data-theme="midnight"] .cta {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  box-shadow: 0 0 28px rgba(99, 102, 241, 0.45), 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+[data-theme="midnight"] .cta:active {
+  transform: scale(0.985);
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.4);
+}
+[data-theme="midnight"] .icon-btn {
+  background: #15151c;
+  color: var(--color-ink);
+  border: 1px solid #2a2a38;
+  box-shadow: none;
+}
+[data-theme="midnight"] .icon-btn:active {
+  transform: scale(0.95);
+  background: #1c1c27;
+}
+[data-theme="midnight"] .ghost:active {
+  background: #1a1a24;
+  box-shadow: none;
+}
+[data-theme="midnight"] .ring-track-bar {
+  background: #22222d;
+  box-shadow: none;
+}
+
+/* ============================================================
+   CLAYMORPHISM — knetig, pastellig
+   ============================================================ */
+[data-theme="clay"] {
+  --color-canvas: #e9e6ff;
+  --color-ink: #2e2a4a;
+  --color-muted: #6b6790;
+  --color-faint: #a09cc8;
+  --app-bg: #e9e6ff;
+  --ring-track: #d6d0ff;
+  --ring-fill: #7c6cff;
+  --accent: #7c6cff;
+}
+[data-theme="clay"] .card,
+[data-theme="clay"] .ring-shell {
+  background: #f4f2ff;
+  border: none;
+  box-shadow: 10px 10px 22px rgba(150, 140, 210, 0.4),
+    -6px -6px 14px rgba(255, 255, 255, 0.9),
+    inset -3px -3px 8px rgba(150, 140, 210, 0.25),
+    inset 4px 4px 8px rgba(255, 255, 255, 0.85);
+}
+[data-theme="clay"] .card {
+  border-radius: 2rem;
+}
+[data-theme="clay"] .card-2,
+[data-theme="clay"] .chip,
+[data-theme="clay"] .seg {
+  background: #ece8ff;
+  box-shadow: inset 4px 4px 10px rgba(150, 140, 210, 0.35),
+    inset -4px -4px 10px rgba(255, 255, 255, 0.85);
+}
+[data-theme="clay"] .seg-active {
+  background: #f4f2ff;
+  box-shadow: 5px 5px 12px rgba(150, 140, 210, 0.4),
+    -4px -4px 10px rgba(255, 255, 255, 0.9);
+}
+[data-theme="clay"] .cta {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 8px 8px 18px rgba(124, 108, 255, 0.45),
+    -5px -5px 12px rgba(255, 255, 255, 0.7),
+    inset -3px -3px 8px rgba(80, 60, 200, 0.35),
+    inset 3px 3px 8px rgba(255, 255, 255, 0.4);
+}
+[data-theme="clay"] .cta:active {
+  transform: scale(0.98);
+  box-shadow: 4px 4px 10px rgba(124, 108, 255, 0.45),
+    inset -2px -2px 6px rgba(80, 60, 200, 0.35);
+}
+[data-theme="clay"] .icon-btn {
+  background: #f4f2ff;
+  color: var(--color-ink);
+  box-shadow: 6px 6px 14px rgba(150, 140, 210, 0.4),
+    -4px -4px 10px rgba(255, 255, 255, 0.9);
+}
+[data-theme="clay"] .icon-btn:active {
+  transform: scale(0.95);
+  box-shadow: inset 4px 4px 9px rgba(150, 140, 210, 0.4),
+    inset -3px -3px 8px rgba(255, 255, 255, 0.8);
+}
+[data-theme="clay"] .ghost:active {
+  box-shadow: inset 4px 4px 9px rgba(150, 140, 210, 0.35),
+    inset -3px -3px 8px rgba(255, 255, 255, 0.8);
+}
+[data-theme="clay"] .ring-track-bar {
+  background: #ece8ff;
+  box-shadow: inset 2px 2px 5px rgba(150, 140, 210, 0.35),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.8);
+}
+
+/* ============================================================
+   Motion
+   ============================================================ */
 @keyframes bump {
   0% { transform: scale(1); }
   35% { transform: scale(1.08); }
   100% { transform: scale(1); }
 }
-.animate-bump { animation: bump 0.42s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.animate-bump {
+  animation: bump 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 
 @keyframes flash-in {
   0% { opacity: 0; transform: translateY(8px) scale(0.96); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
-.animate-flash-in { animation: flash-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.animate-flash-in {
+  animation: flash-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;

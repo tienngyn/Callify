@@ -5,43 +5,45 @@ import { STORAGE_KEY, getDayConfig, MILESTONES } from "@/lib/config";
 import { dayKey, minutesOfDay } from "@/lib/date";
 import { computePace } from "@/lib/pace";
 
-type StoredState = {
-  date: string;
-  completed: number;
-  touched: number;
-};
+/** Verlauf: abgeschlossene Calls pro Kalendertag (Key = YYYY-MM-DD). */
+type DaysMap = Record<string, number>;
+type StoredState = { version: 2; days: DaysMap };
 
-function loadState(today: string): StoredState {
-  if (typeof window === "undefined") {
-    return { date: today, completed: 0, touched: 0 };
-  }
+/** Alte Einträge kappen, damit localStorage nicht endlos wächst. */
+function prune(days: DaysMap, keepDays = 70): DaysMap {
+  const keys = Object.keys(days).sort();
+  if (keys.length <= keepDays) return days;
+  const drop = new Set(keys.slice(0, keys.length - keepDays));
+  const next: DaysMap = {};
+  for (const k of keys) if (!drop.has(k)) next[k] = days[k];
+  return next;
+}
+
+function loadDays(): DaysMap {
+  if (typeof window === "undefined") return {};
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as StoredState;
-      // Neuer Kalendertag -> sauber bei 0 starten.
-      if (parsed.date === today) {
-        return {
-          date: today,
-          completed: Math.max(0, parsed.completed | 0),
-          touched: Math.max(0, parsed.touched | 0),
-        };
-      }
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    // v1 -> v2 Migration (war { date, completed, touched }).
+    if (parsed && parsed.version === 2 && parsed.days) {
+      return parsed.days as DaysMap;
+    }
+    if (parsed && typeof parsed.completed === "number" && parsed.date) {
+      return { [parsed.date]: Math.max(0, parsed.completed | 0) };
     }
   } catch {
-    /* korrupter State -> frisch starten */
+    /* korrupt -> frisch */
   }
-  return { date: today, completed: 0, touched: 0 };
+  return {};
 }
 
 export type Milestone = { label: string; message: string } | null;
 
 export function useCallTracker() {
-  // Auf dem Server / erstem Render deterministisch (vermeidet Hydration-Mismatch).
   const [hydrated, setHydrated] = useState(false);
   const [now, setNow] = useState<Date>(() => new Date());
-  const [completed, setCompleted] = useState(0);
-  const [touched, setTouched] = useState(0);
+  const [days, setDays] = useState<DaysMap>({});
 
   const [justBumped, setJustBumped] = useState(false);
   const [milestone, setMilestone] = useState<Milestone>(null);
@@ -50,46 +52,34 @@ export function useCallTracker() {
   const today = dayKey(now);
   const weekday = now.getDay();
   const config = getDayConfig(weekday);
+  const completed = days[today] ?? 0;
 
-  // Initiales Laden aus localStorage nach Mount.
+  // Laden nach Mount.
   useEffect(() => {
-    const t = dayKey();
-    const s = loadState(t);
-    setCompleted(s.completed);
-    setTouched(s.touched);
-    prevCompleted.current = s.completed;
+    const loaded = loadDays();
+    setDays(loaded);
+    prevCompleted.current = loaded[dayKey()] ?? 0;
     setHydrated(true);
   }, []);
 
   // Persistieren.
   useEffect(() => {
     if (!hydrated) return;
-    const state: StoredState = { date: today, completed, touched };
+    const state: StoredState = { version: 2, days };
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {
-      /* localStorage nicht verfügbar -> still ignorieren */
+      /* ignore */
     }
-  }, [hydrated, today, completed, touched]);
+  }, [hydrated, days]);
 
-  // Live-Uhr: minütlich aktualisieren (für Pace) + Datumswechsel abfangen.
+  // Live-Uhr (für Pace) + Datumswechsel.
   useEffect(() => {
-    const id = setInterval(() => {
-      const next = new Date();
-      setNow((prev) => {
-        // Bei Tageswechsel Zähler zurücksetzen.
-        if (dayKey(prev) !== dayKey(next)) {
-          setCompleted(0);
-          setTouched(0);
-          prevCompleted.current = 0;
-        }
-        return next;
-      });
-    }, 30_000);
+    const id = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(id);
   }, []);
 
-  // Meilenstein- + Bump-Erkennung bei Erhöhung.
+  // Bump- + Meilenstein-Erkennung.
   useEffect(() => {
     if (!hydrated) return;
     const prev = prevCompleted.current;
@@ -97,7 +87,6 @@ export function useCallTracker() {
       setJustBumped(true);
       const bumpTimer = setTimeout(() => setJustBumped(false), 420);
 
-      // Wurde eine Meilenstein-Schwelle überschritten?
       const hit = MILESTONES.find((m) => {
         const threshold = Math.ceil(m.fraction * config.goal);
         return prev < threshold && completed >= threshold;
@@ -118,18 +107,21 @@ export function useCallTracker() {
     prevCompleted.current = completed;
   }, [completed, hydrated, config.goal]);
 
-  const addCompleted = useCallback(() => setCompleted((c) => c + 1), []);
-  const undoCompleted = useCallback(
-    () => setCompleted((c) => Math.max(0, c - 1)),
-    []
-  );
-  const addTouched = useCallback(() => setTouched((t) => t + 1), []);
+  const setToday = useCallback((updater: (current: number) => number) => {
+    setDays((prev) => {
+      const t = dayKey();
+      const next = Math.max(0, updater(prev[t] ?? 0));
+      return prune({ ...prev, [t]: next });
+    });
+  }, []);
+
+  const addCompleted = useCallback(() => setToday((c) => c + 1), [setToday]);
+  const undoCompleted = useCallback(() => setToday((c) => c - 1), [setToday]);
   const resetDay = useCallback(() => {
-    setCompleted(0);
-    setTouched(0);
+    setToday(() => 0);
     prevCompleted.current = 0;
     setMilestone(null);
-  }, []);
+  }, [setToday]);
 
   const dismissMilestone = useCallback(() => setMilestone(null), []);
 
@@ -140,15 +132,13 @@ export function useCallTracker() {
     now,
     weekday,
     goal: config.goal,
-    window: config.window,
     completed,
-    touched,
+    days,
     pace,
     justBumped,
     milestone,
     addCompleted,
     undoCompleted,
-    addTouched,
     resetDay,
     dismissMilestone,
   };
