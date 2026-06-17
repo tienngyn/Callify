@@ -4,11 +4,16 @@ type Props = {
   completed: number;
   goal: number;
   bumped: boolean;
+  size?: number;
 };
 
-export default function ProgressRing({ completed, goal, bumped }: Props) {
-  const size = 280;
-  const stroke = 18;
+export default function ProgressRing({
+  completed,
+  goal,
+  bumped,
+  size = 248,
+}: Props) {
+  const stroke = 16;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const progress = goal > 0 ? Math.min(completed / goal, 1) : 0;
@@ -17,7 +22,7 @@ export default function ProgressRing({ completed, goal, bumped }: Props) {
 
   return (
     <div
-      className="nm-raised relative grid place-items-center rounded-full"
+      className="ring-shell relative grid place-items-center"
       style={{ width: size + 36, height: size + 36 }}
     >
       <svg
@@ -28,22 +33,20 @@ export default function ProgressRing({ completed, goal, bumped }: Props) {
         role="img"
         aria-label={`${completed} von ${goal} Calls, ${pct} Prozent`}
       >
-        {/* Eingelassene Rille als Track. */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="var(--color-groove)"
+          stroke="var(--ring-track)"
           strokeWidth={stroke}
         />
-        {/* Fortschritt in Tinte. */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="var(--color-ink)"
+          stroke="var(--ring-fill)"
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
@@ -60,7 +63,7 @@ export default function ProgressRing({ completed, goal, bumped }: Props) {
             bumped ? "animate-bump" : ""
           }`}
         >
-          <span className="text-[5.5rem] font-bold tracking-tight">
+          <span className="text-[5rem] font-bold tracking-tight">
             {completed}
           </span>
           <span className="text-3xl font-semibold text-faint">/{goal}</span>

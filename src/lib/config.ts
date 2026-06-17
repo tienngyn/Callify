@@ -55,6 +55,14 @@ export const WEEKDAY_NAMES = [
   "Samstag",
 ] as const;
 
+/** Kurze Wochentagsnamen (für die Wochenansicht). */
+export const WEEKDAY_SHORT = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"] as const;
+
+/** Ob für diesen Wochentag ein echtes Arbeitsziel konfiguriert ist. */
+export function isWorkday(weekday: number): boolean {
+  return weekday in DAY_CONFIGS;
+}
+
 /** Meilensteine als Anteil des Ziels mit Begleittext. */
 export const MILESTONES: { fraction: number; label: string; message: string }[] = [
   { fraction: 0.25, label: "25 %", message: "Guter Start — ein Viertel steht." },
