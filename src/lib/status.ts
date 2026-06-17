@@ -1,24 +1,27 @@
 import { PaceStatus } from "./pace";
 
-export type StatusColors = {
-  /** Kräftige Statusfarbe (Ring, Text, Akzent). */
-  main: string;
-  /** Sehr helle Variante (Banner-Hintergrund, Chips). */
-  soft: string;
+export type StatusMeta = {
+  /** Monochromes Glyph, das den Status ohne Farbe signalisiert. */
+  symbol: string;
+  /** Tiefe des Pace-Banners: vor/auf Plan ruht erhaben, hinter Plan eingelassen. */
+  depth: "raised" | "inset";
 };
 
-/** Mappt einen Pace-Status auf die CSS-Variablen aus globals.css. */
-export function statusColors(status: PaceStatus): StatusColors {
+/**
+ * Im Schwarz-Weiß-Design tragen Symbol + Tiefe (raised/inset) die
+ * Status-Bedeutung — nicht die Farbe.
+ */
+export function statusMeta(status: PaceStatus): StatusMeta {
   switch (status) {
     case "done":
-      return { main: "var(--color-done)", soft: "var(--color-done-soft)" };
+      return { symbol: "✓", depth: "raised" };
     case "ahead":
-      return { main: "var(--color-ahead)", soft: "var(--color-ahead-soft)" };
+      return { symbol: "▲", depth: "raised" };
     case "onpace":
-      return { main: "var(--color-onpace)", soft: "var(--color-onpace-soft)" };
+      return { symbol: "●", depth: "raised" };
     case "warn":
-      return { main: "var(--color-warn)", soft: "var(--color-warn-soft)" };
+      return { symbol: "▼", depth: "inset" };
     case "alarm":
-      return { main: "var(--color-alarm)", soft: "var(--color-alarm-soft)" };
+      return { symbol: "▼▼", depth: "inset" };
   }
 }
