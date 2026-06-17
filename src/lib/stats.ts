@@ -66,3 +66,23 @@ export function monthStats(days: DaysMap, now: Date): MonthStats {
     streak: computeStreak(days, now),
   };
 }
+
+/**
+ * Persönlicher Rekord über den gesamten Verlauf.
+ * `excludeKey` blendet z. B. den heutigen Tag aus (für „Rekord zu schlagen").
+ */
+export function personalBest(
+  days: DaysMap,
+  excludeKey?: string
+): { best: number; key: string | null } {
+  let best = 0;
+  let key: string | null = null;
+  for (const [k, v] of Object.entries(days)) {
+    if (k === excludeKey) continue;
+    if (v > best) {
+      best = v;
+      key = k;
+    }
+  }
+  return { best, key };
+}
