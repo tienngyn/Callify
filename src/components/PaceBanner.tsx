@@ -1,33 +1,26 @@
 "use client";
 
 import { Pace } from "@/lib/pace";
-import { statusColors } from "@/lib/status";
-
-function StatusDot({ color }: { color: string }) {
-  return (
-    <span
-      className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
-      style={{ backgroundColor: color }}
-      aria-hidden
-    />
-  );
-}
+import { statusMeta } from "@/lib/status";
 
 export default function PaceBanner({ pace }: { pace: Pace }) {
-  const c = statusColors(pace.status);
+  const meta = statusMeta(pace.status);
   return (
     <div
-      className="flex items-center gap-3 rounded-2xl px-5 py-4 transition-colors duration-300"
-      style={{ backgroundColor: c.soft }}
+      className={`flex items-center gap-4 rounded-3xl px-5 py-4 ${
+        meta.depth === "inset" ? "nm-inset" : "nm-raised"
+      }`}
       role="status"
       aria-live="polite"
     >
-      <StatusDot color={c.main} />
+      <span
+        className="nm-inset tnum grid h-11 w-11 shrink-0 place-items-center rounded-2xl text-sm font-bold text-ink"
+        aria-hidden
+      >
+        {meta.symbol}
+      </span>
       <div className="min-w-0">
-        <p
-          className="tnum text-base font-semibold leading-tight"
-          style={{ color: c.main }}
-        >
+        <p className="tnum text-base font-bold leading-tight text-ink">
           {pace.headline}
         </p>
         <p className="text-sm text-muted leading-tight">{pace.detail}</p>

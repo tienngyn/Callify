@@ -23,8 +23,8 @@ export default function MilestoneFlash({
       className="pointer-events-none fixed inset-x-0 top-6 z-50 flex justify-center px-4"
       aria-live="assertive"
     >
-      <div className="animate-flash-in flex items-center gap-3 rounded-full border border-hairline bg-surface px-5 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
-        <span className="text-lg" aria-hidden>
+      <div className="nm-raised animate-flash-in flex items-center gap-3 rounded-full px-5 py-3">
+        <span className="text-lg text-ink" aria-hidden>
           ✦
         </span>
         <div className="leading-tight">

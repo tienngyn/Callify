@@ -3,13 +3,12 @@
 type Props = {
   completed: number;
   goal: number;
-  color: string;
   bumped: boolean;
 };
 
-export default function ProgressRing({ completed, goal, color, bumped }: Props) {
+export default function ProgressRing({ completed, goal, bumped }: Props) {
   const size = 280;
-  const stroke = 16;
+  const stroke = 18;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const progress = goal > 0 ? Math.min(completed / goal, 1) : 0;
@@ -17,7 +16,10 @@ export default function ProgressRing({ completed, goal, color, bumped }: Props) 
   const pct = Math.round(progress * 100);
 
   return (
-    <div className="relative" style={{ width: size, height: size }}>
+    <div
+      className="nm-raised relative grid place-items-center rounded-full"
+      style={{ width: size + 36, height: size + 36 }}
+    >
       <svg
         width={size}
         height={size}
@@ -26,41 +28,39 @@ export default function ProgressRing({ completed, goal, color, bumped }: Props) 
         role="img"
         aria-label={`${completed} von ${goal} Calls, ${pct} Prozent`}
       >
+        {/* Eingelassene Rille als Track. */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="var(--color-hairline)"
+          stroke="var(--color-groove)"
           strokeWidth={stroke}
         />
+        {/* Fortschritt in Tinte. */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke={color}
+          stroke="var(--color-ink)"
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={dashoffset}
           style={{
-            transition:
-              "stroke-dashoffset 0.6s cubic-bezier(0.2,0.8,0.2,1), stroke 0.4s ease",
+            transition: "stroke-dashoffset 0.6s cubic-bezier(0.2,0.8,0.2,1)",
           }}
         />
       </svg>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <div
-          className={`tnum flex items-baseline gap-1 font-[family-name:var(--font-display)] leading-none ${
+          className={`tnum flex items-baseline gap-1 font-[family-name:var(--font-display)] leading-none text-ink ${
             bumped ? "animate-bump" : ""
           }`}
         >
-          <span
-            className="text-[5.5rem] font-bold tracking-tight"
-            style={{ color }}
-          >
+          <span className="text-[5.5rem] font-bold tracking-tight">
             {completed}
           </span>
           <span className="text-3xl font-semibold text-faint">/{goal}</span>
