@@ -11,6 +11,7 @@ import MilestoneFlash from "@/components/MilestoneFlash";
 import WeekView from "@/components/WeekView";
 import MonthView from "@/components/MonthView";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import DaySummary from "@/components/DaySummary";
 
 type View = "today" | "week" | "month";
 
@@ -25,6 +26,7 @@ export default function Home() {
   const { theme, setTheme } = useTheme();
   const [view, setView] = useState<View>("today");
   const [confirmReset, setConfirmReset] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
 
   if (!t.hydrated) {
     return (
@@ -37,6 +39,15 @@ export default function Home() {
   return (
     <main className="flex h-dvh flex-col items-center overflow-hidden px-5 pb-6 pt-6">
       <MilestoneFlash milestone={t.milestone} onDismiss={t.dismissMilestone} />
+      <DaySummary
+        open={summaryOpen}
+        onClose={() => setSummaryOpen(false)}
+        session={t.session}
+        goal={t.goal}
+        stretch={t.stretchGoal}
+        days={t.days}
+        now={t.now}
+      />
 
       <div className="flex min-h-0 w-full max-w-md flex-1 flex-col">
         {/* Header */}
@@ -92,7 +103,27 @@ export default function Home() {
             </section>
 
             {/* Aktionen */}
-            <section className="shrink-0 pt-5">
+            <section className="shrink-0 pt-4">
+              {/* Arbeitstag-Status */}
+              <div className="mb-2 flex h-5 items-center justify-center">
+                {t.workdayActive && t.session?.startedAt != null ? (
+                  <span className="tnum text-xs font-medium text-faint">
+                    ● Arbeitstag läuft seit {formatMinutes(t.session.startedAt)}
+                  </span>
+                ) : t.workdayEnded ? (
+                  <button
+                    onClick={() => setSummaryOpen(true)}
+                    className="text-xs font-medium text-faint underline-offset-2 hover:underline"
+                  >
+                    Arbeitstag beendet · {t.completed} Calls · Übersicht ansehen
+                  </button>
+                ) : (
+                  <span className="text-xs font-medium text-faint">
+                    Arbeitstag noch nicht gestartet
+                  </span>
+                )}
+              </div>
+
               <button
                 onClick={t.addCompleted}
                 className="cta flex w-full items-center justify-center gap-2 px-6 py-5 text-xl"
@@ -103,7 +134,7 @@ export default function Home() {
                 Call abgeschlossen
               </button>
 
-              <div className="mt-3 flex items-center justify-between">
+              <div className="mt-3 flex items-center justify-between gap-2">
                 <button
                   onClick={t.undoCompleted}
                   disabled={t.completed === 0}
@@ -112,20 +143,42 @@ export default function Home() {
                   ↩ Rückgängig
                 </button>
 
+                {t.workdayActive ? (
+                  <button
+                    onClick={() => {
+                      t.endWorkday();
+                      setSummaryOpen(true);
+                    }}
+                    className="ghost px-4 py-2.5 text-sm font-bold text-ink"
+                  >
+                    ■ Arbeitstag beenden
+                  </button>
+                ) : (
+                  <button
+                    onClick={t.startWorkday}
+                    className="ghost px-4 py-2.5 text-sm font-bold text-ink"
+                  >
+                    ▶ Arbeitstag starten
+                  </button>
+                )}
+              </div>
+
+              {/* Tag zurücksetzen — dezent */}
+              <div className="mt-1 flex h-6 items-center justify-center">
                 {confirmReset ? (
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-3">
                     <button
                       onClick={() => {
                         t.resetDay();
                         setConfirmReset(false);
                       }}
-                      className="ghost px-3 py-2.5 text-sm font-bold text-ink"
+                      className="text-xs font-bold text-ink"
                     >
-                      Wirklich?
+                      Wirklich zurücksetzen?
                     </button>
                     <button
                       onClick={() => setConfirmReset(false)}
-                      className="ghost px-3 py-2.5 text-sm font-medium text-muted"
+                      className="text-xs font-medium text-faint"
                     >
                       Abbrechen
                     </button>
@@ -133,7 +186,7 @@ export default function Home() {
                 ) : (
                   <button
                     onClick={() => setConfirmReset(true)}
-                    className="ghost px-4 py-2.5 text-sm font-medium text-faint"
+                    className="text-xs font-medium text-faint hover:text-muted"
                   >
                     Tag zurücksetzen
                   </button>
