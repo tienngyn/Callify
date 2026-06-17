@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  /* Warmes, leicht getöntes Off-White statt reinweiß. */
+  --color-canvas: #f6f5f1;
+  --color-surface: #fffefb;
+  --color-ink: #1c1b19;
+  --color-muted: #6b6862;
+  --color-faint: #a3a09a;
+  --color-hairline: #e8e6e0;
+
+  /* Pace-Statusfarben (ruhig, modern). */
+  --color-ahead: #2f9e6f;   /* gedämpftes Grün */
+  --color-ahead-soft: #e6f4ec;
+  --color-onpace: #3f8fd6;  /* ruhiges Blau */
+  --color-onpace-soft: #e7f0fa;
+  --color-warn: #c98a2b;    /* warmer Bernstein */
+  --color-warn-soft: #fbf0dd;
+  --color-alarm: #d2553f;   /* gedämpftes Korall-Rot */
+  --color-alarm-soft: #fae7e2;
+  --color-done: #2f9e6f;
+  --color-done-soft: #e3f6ea;
+
+  --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 1.5rem;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tabular numbers überall für Zahlen. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Sauberer Touch: kein Doppeltipp-Zoom, kein blaues Tap-Highlight. */
+button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Sichtbarer Tastatur-Fokus. */
+:focus-visible {
+  outline: 2px solid var(--color-onpace);
+  outline-offset: 3px;
+  border-radius: 0.5rem;
+}
+
+@keyframes bump {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.09); }
+  100% { transform: scale(1); }
+}
+.animate-bump {
+  animation: bump 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes flash-in {
+  0% { opacity: 0; transform: translateY(8px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-flash-in {
+  animation: flash-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes press-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
