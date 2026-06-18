@@ -481,6 +481,41 @@ button {
   animation: flash-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* ---- Pace-Maskottchen ---- */
+.mascot {
+  transform-origin: 50% 92%;
+}
+@keyframes mascot-cheer {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  30% { transform: translateY(-3px) rotate(-4deg); }
+  60% { transform: translateY(-1px) rotate(4deg); }
+}
+.mascot-cheer { animation: mascot-cheer 1s ease-in-out infinite; }
+
+@keyframes mascot-dash {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(1.5px) translateY(-1px); }
+}
+.mascot-dash { animation: mascot-dash 0.36s ease-in-out infinite; }
+
+@keyframes mascot-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+.mascot-bob { animation: mascot-bob 2.4s ease-in-out infinite; }
+
+@keyframes mascot-sway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+.mascot-sway { animation: mascot-sway 3s ease-in-out infinite; }
+
+@keyframes mascot-tired {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(1.5px) scaleY(0.97); }
+}
+.mascot-tired { animation: mascot-tired 3.4s ease-in-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
